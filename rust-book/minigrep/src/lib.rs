@@ -11,6 +11,7 @@ impl Config {
         if args.len() < 3 {
             return Err("not enough arguments");
         }
+
         let query = args[1].clone();
         let filename = args[2].clone();
 
@@ -20,8 +21,29 @@ impl Config {
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let contents = fs::read_to_string(&config.filename)?;
-    println!("Searching for '{}'", config.query);
-    println!("In file {}\n", config.filename);
-    println!("With text:\n{}", contents);
+
+    for line in search(&config.query, &contents) {
+        println!("{}", line);
+    }
+
     Ok(())
+}
+
+pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+    contents
+        .lines()
+        .filter(|line| line.contains(query))
+        .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn one_result() {
+        let query = "duct";
+        let contents = "Rust:\nsafe, fast, productive.\nPick three.";
+        assert_eq!(vec!["safe, fast, productive."], search(query, contents));
+    }
 }
