@@ -41,3 +41,26 @@ impl<T> Default for List<T> {
         List { head: None }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::List;
+
+    #[test]
+    fn basics() {
+        let list = List::new();
+        assert_eq!(list.head(), None);
+
+        let list = list.append(1).append(2).append(3);
+        assert_eq!(list.head(), Some(&3));
+
+        let list = list.tail();
+        assert_eq!(list.head(), Some(&2));
+
+        let list = list.tail();
+        assert_eq!(list.head(), Some(&1));
+
+        let list = list.tail();
+        assert_eq!(list.head(), None);
+    }
+}
