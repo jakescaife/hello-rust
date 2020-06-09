@@ -1,7 +1,7 @@
-use std::cell::RefCell;
-use std::rc::Rc;
-
 use std::cell::Ref;
+use std::cell::RefCell;
+use std::cell::RefMut;
+use std::rc::Rc;
 
 pub struct List<T> {
     head: Link<T>,
@@ -65,6 +65,12 @@ impl<T> List<T> {
             .as_ref()
             .map(|node| Ref::map(node.borrow(), |node| &node.elem))
     }
+
+    pub fn peek_front_mut(&mut self) -> Option<RefMut<T>> {
+        self.head
+            .as_ref()
+            .map(|node| RefMut::map(node.borrow_mut(), |node| &mut node.elem))
+    }
 }
 
 impl<T> Default for List<T> {
@@ -112,11 +118,13 @@ mod tests {
     fn peek() {
         let mut list = List::new();
         assert!(list.peek_front().is_none());
+        assert!(list.peek_front_mut().is_none());
 
         list.push_front(1);
         list.push_front(2);
         list.push_front(3);
 
         assert_eq!(&*list.peek_front().unwrap(), &3);
+        assert_eq!(&*list.peek_front_mut().unwrap(), &mut 3);
     }
 }
