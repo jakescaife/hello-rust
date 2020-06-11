@@ -1,6 +1,10 @@
-pub struct List<'a, T> {
+#![allow(dead_code)]
+
+use std::ptr;
+
+pub struct List<T> {
     head: Link<T>,
-    tail: Option<&'a mut Node<T>>,
+    tail: *mut Node<T>,
 }
 
 type Link<T> = Option<Box<Node<T>>>;
@@ -10,72 +14,17 @@ struct Node<T> {
     next: Link<T>,
 }
 
-impl<'a, T> List<'a, T> {
+impl<T> List<T> {
     pub fn new() -> Self {
         List {
             head: None,
-            tail: None,
+            tail: ptr::null_mut(),
         }
     }
-
-    pub fn push(&'a mut self, elem: T) {
-        let new_tail = Box::new(Node { elem, next: None });
-
-        self.tail = match self.tail.take() {
-            Some(old_tail) => {
-                old_tail.next = Some(new_tail);
-                old_tail.next.as_deref_mut()
-            }
-            None => {
-                self.head = Some(new_tail);
-                self.head.as_deref_mut()
-            }
-        };
-    }
-
-    pub fn pop(&'a mut self) -> Option<T> {
-        self.head.take().map(|head| {
-            let head = *head;
-            self.head = head.next;
-
-            if self.head.is_none() {
-                self.tail = None;
-            }
-
-            head.elem
-        })
-    }
 }
 
-impl<'a, T> Default for List<'a, T> {
+impl<T> Default for List<T> {
     fn default() -> Self {
         Self::new()
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::List;
-
-    #[test]
-    fn basics() {
-        let mut list = List::new();
-
-        assert!(list.pop().is_none());
-
-        list.push(1);
-        list.push(2);
-        list.push(3);
-
-        assert_eq!(list.pop(), Some(1));
-        assert_eq!(list.pop(), Some(2));
-
-        list.push(4);
-        list.push(5);
-
-        assert_eq!(list.pop(), Some(3));
-        assert_eq!(list.pop(), Some(4));
-        assert_eq!(list.pop(), Some(5));
-        assert!(list.pop().is_none());
     }
 }
